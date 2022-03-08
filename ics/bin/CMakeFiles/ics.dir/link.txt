@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/ics.dir/src/main.cpp.o CMakeFiles/ics.dir/src/memarena.cpp.o -o ics 
