@@ -3,80 +3,174 @@
 
 #include "memarena.h"
 
-MemoryArena::MemoryArena()
-    : BlockSize(0)
-    , Count(0)
-    , FreeList(nullptr)
-    , Mem(nullptr)
+Handle::Handle()
+    : Index(UINT32_MAX)
 {
 
 }
 
-void MemoryArena::Init(size_t blocksz, size_t count)
+Handle& Handle::operator=(uint32_t handle)
+{
+    Index = handle;
+    return *this;
+}
+
+Handle& Handle::operator+=(const Handle& handle)
+{
+    Index += handle.Index;
+    return *this;
+}
+
+Handle& Handle::operator+=(uint32_t handle)
+{
+    Index += handle;
+    return *this;
+}
+
+Handle& Handle::operator-=(const Handle& handle)
+{
+    Index -= handle.Index;
+    return *this;
+}
+
+Handle& Handle::operator-=(uint32_t handle)
+{
+    Index -= handle;
+    return *this;
+}
+
+operator Handle::bool()
+{
+    return Index != UINT32_MAX;
+}
+
+Handle operator+(const Handle& h1, const Handle& h2)
+{
+    return Handle{ h1.Index + h2.Index };
+}
+
+Handle operator+(uint32_t h1, const Handle& h2)
+{
+    return Handle{ h1 + h2.Index };
+}
+
+Handle operator+(const Handle& h1, uint32_t h2)
+{
+    return Handle{ h1.Index + h2 };
+}
+
+Handle operator-(const Handle& h1, const Handle& h2)
+{
+    return Handle{ h1.Index - h2.Index };
+}
+
+Handle operator-(uint32_t h1, const Handle& h2)
+{
+    return Handle{ h1 - h2.Index };
+}
+
+Handle operator-(const Handle& h1, uint32_t h2)
+{
+    return Handle{ h1.Index - h2 };
+}
+
+Arena::Arena()
+    : BlockSz(0)
+    , Count(0)
+    , FreeList(nullptr)
+    , Memory(nullptr)
+{
+
+}
+
+void Arena::Init(size_t blocksz, size_t count)
 {
     size_t pad = blocksz % 8;
     pad = pad ? 8 - pad : 0;
-    BlockSize = blocksz + pad;
+    BlockSz = blocksz + pad;
     Count = count;
 
-    Mem = (uint8_t*)malloc(BlockSize * Count);
-    memset(Mem, 0, BlockSize * Count);
+    Memory = (uint8_t*)malloc(BlockSz * Count);
+    memset(Memory, 0, BlockSz * Count);
 
-    uint64_t* ptr = (uint64_t*)Mem;
+    size_t* ptr = (size_t*)Memory;
     FreeList = ptr;
 
-    uint64_t* end = (uint64_t*)(Mem + BlockSize * Count);
+    size_t* end = (size_t*)(Memory + BlockSz * Count);
     while (ptr != end)
     {
-        uint64_t* next = (uint64_t*)((uint8_t*)ptr + BlockSize);
-        *ptr = (uint64_t)next;
+        size_t* next = (size_t*)((uint8_t*)ptr + BlockSz);
+        *ptr = (size_t)next;
         ptr = next;
     }
 }
 
-void MemoryArena::Shutdown()
+void Arena::Shutdown()
 {
-    free(Mem);
+    free(Memory);
 
-    BlockSize = 0;
+    BlockSz = 0;
     Count = 0;
     FreeList = nullptr;
-    Mem = nullptr;
+    Memory = nullptr;
 }
 
-void MemoryArena::Resize(size_t count)
+void Arena::Resize(size_t count)
 {
     size_t diff = Count - count;
 
     Count = count;
-    Mem = (uint8_t*)realloc(Mem, BlockSize * Count);
+    Memory = (uint8_t*)realloc(Memory, BlockSz * Count);
 
-    uint64_t* ptr = FreeList;
+    size_t* ptr = FreeList;
     while (*ptr)
-        ptr = (uint64_t*)*ptr;
+        ptr = (size_t*)*ptr;
 
     for (size_t i = 0; i < diff; i++)
     {
-        uint64_t* next = (uint64_t*)((uint8_t*)ptr + BlockSize);
-        *ptr = (uint64_t)next;
+        size_t* next = (size_t*)((uint8_t*)ptr + BlockSz);
+        *ptr = (size_t)next;
         ptr = next;
     }
 }
 
-void* MemoryArena::Allocate()
+void* Arena::Alloc()
 {
     if (!FreeList)
         return nullptr;
 
     void* mem = FreeList;
-    FreeList = (uint64_t*)*FreeList;
+    FreeList = (size_t*)*FreeList;
 
     return mem;
 }
 
-void MemoryArena::Free(void* mem)
+void Arena::Alloc(Handle& handle)
 {
-    uint64_t* ptr = (uint64_t*)mem;
-    *ptr = (uint64_t)FreeList;
+    if (!FreeList)
+        handle = UINT32_MAX;
+
+    uint8_t* mem = (uint8_t*)FreeList;
+    FreeList = (size_t*)*FreeList;
+
+    handle = mem - Memory;
+}
+
+void Arena::Free(void* mem)
+{
+    size_t* ptr = (size_t*)mem;
+    *ptr = (size_t)FreeList;
     FreeList = ptr;
+}
+
+void Arena::Free(Handle handle)
+{
+    size_t* ptr = (size_t*)&Memory[handle.Index];
+    *ptr = (size_t)Freelist;
+    Freelist = ptr;
+}
+
+uint8_t* Arena::operator[](Handle handle)
+{
+    return &Memory[handle.Index];
 }

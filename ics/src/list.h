@@ -9,13 +9,13 @@ struct List
 
     struct Node
     {
-        Type Val;
         Node* Next;
+        Type Val;
     };
 
-    MemoryArena Memory;
     Node* First;
     Node* Last;
+    Arena Memory;
 
     List()
         : Memory()
@@ -29,7 +29,7 @@ struct List
     {
         Memory.Init(sizeof(Node), count + 1);
         First = (Node*)Memory.Mem;
-        Last = (Node*)Memory.Allocate();
+        Last = (Node*)Memory.Alloc();
     }
 
     void Shutdown()
