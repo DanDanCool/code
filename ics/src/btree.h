@@ -137,6 +137,13 @@ struct BinaryTree
                         c = (Node*)Nodes[i];
                         i = c->Child[0];
                     }
+
+                    Node* p = (Node*)Nodes[c->Parent];
+                    Type* pval = (Type*)Memory[p->Val];
+                    Type* cval = (Type*)Memory[c->Val];
+
+                    int a = *cval > *pval;
+                    p->Child[a] = UINT32_MAX;
                 }
 
                 Handle tmp = n->Val;
