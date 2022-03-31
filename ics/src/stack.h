@@ -7,12 +7,12 @@ struct Stack
 {
     using Type = T;
 
-    Type* Memory;
+    Type* Data;
     size_t Size;
     size_t Index;
 
     Stack()
-        : Memory(nullptr)
+        : Data(nullptr)
         , Size(0)
         , Index(0)
     {
@@ -22,31 +22,31 @@ struct Stack
     void Init(size_t count)
     {
         Size = count;
-        Memory = (Type*)malloc(sizeof(Type) * count);
-        memset(Memory, 0, sizeof(Type) * count);
+        Data = (Type*)malloc(sizeof(Type) * count);
+        memset(Data, 0, sizeof(Type) * count);
     }
 
     void Shutdown()
     {
-        free(Memory);
-        Memory = nullptr;
+        free(Data);
+        Data = nullptr;
         Size = 0;
         Index = 0;
     }
 
     void Push(const Type& val)
     {
-        Memory[Index] = val;
+        Data[Index] = val;
         Index++;
     }
 
     Type Pop(const Type& val)
     {
-        return Memory[--Index];
+        return Data[--Index];
     }
 
     Type& Peek()
     {
-        return Memory[Index - 1];
+        return Data[Index - 1];
     }
 }

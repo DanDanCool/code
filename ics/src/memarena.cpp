@@ -78,7 +78,7 @@ Arena::Arena()
     : BlockSz(0)
     , Count(0)
     , FreeList(nullptr)
-    , Memory(nullptr)
+    , Data(nullptr)
 {
 
 }
@@ -90,13 +90,13 @@ void Arena::Init(size_t blocksz, size_t count)
     BlockSz = blocksz + pad;
     Count = count;
 
-    Memory = (uint8_t*)malloc(BlockSz * Count);
-    memset(Memory, 0, BlockSz * Count);
+    Data = (uint8_t*)malloc(BlockSz * Count);
+    memset(Data, 0, BlockSz * Count);
 
-    size_t* ptr = (size_t*)Memory;
+    size_t* ptr = (size_t*)Data;
     FreeList = ptr;
 
-    size_t* end = (size_t*)(Memory + BlockSz * Count);
+    size_t* end = (size_t*)(Data + BlockSz * Count);
     while (ptr != end)
     {
         size_t* next = (size_t*)((uint8_t*)ptr + BlockSz);
@@ -107,12 +107,12 @@ void Arena::Init(size_t blocksz, size_t count)
 
 void Arena::Shutdown()
 {
-    free(Memory);
+    free(Data);
 
     BlockSz = 0;
     Count = 0;
     FreeList = nullptr;
-    Memory = nullptr;
+    Data = nullptr;
 }
 
 void Arena::Resize(size_t count)
@@ -120,7 +120,7 @@ void Arena::Resize(size_t count)
     size_t diff = Count - count;
 
     Count = count;
-    Memory = (uint8_t*)realloc(Memory, BlockSz * Count);
+    Data = (uint8_t*)realloc(Data, BlockSz * Count);
 
     size_t* ptr = FreeList;
     while (*ptr)
@@ -153,7 +153,7 @@ void Arena::Alloc(Handle& handle)
     uint8_t* mem = (uint8_t*)FreeList;
     FreeList = (size_t*)*FreeList;
 
-    handle = mem - Memory;
+    handle = mem - Data;
 }
 
 void Arena::Free(void* mem)
@@ -165,12 +165,12 @@ void Arena::Free(void* mem)
 
 void Arena::Free(Handle handle)
 {
-    size_t* ptr = (size_t*)&Memory[handle.Index];
+    size_t* ptr = (size_t*)&Data[handle.Index];
     *ptr = (size_t)Freelist;
     Freelist = ptr;
 }
 
 uint8_t* Arena::operator[](Handle handle)
 {
-    return &Memory[handle.Index];
+    return &Data[handle.Index];
 }

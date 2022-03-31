@@ -15,10 +15,10 @@ struct List
 
     Node* First;
     Node* Last;
-    Arena Memory;
+    Arena Data;
 
     List()
-        : Memory()
+        : Data()
         , First(nullptr)
         , Last(nullptr)
     {
@@ -27,14 +27,14 @@ struct List
 
     void Init(size_t count)
     {
-        Memory.Init(sizeof(Node), count + 1);
-        First = (Node*)Memory.Mem;
-        Last = (Node*)Memory.Alloc();
+        Data.Init(sizeof(Node), count + 1);
+        First = (Node*)Data.Mem;
+        Last = (Node*)Data.Alloc();
     }
 
     void Shutdown()
     {
-        Memory.Shutdown();
+        Data.Shutdown();
         First = nullptr;
         Last = nullptr;
     }
@@ -42,12 +42,12 @@ struct List
     void Add(const Type& val)
     {
         Last->Val = val;
-        Last->Next = (Node*)Memory.Allocate();
+        Last->Next = (Node*)Data.Allocate();
         Last = Last->Next;
     }
 
     void Resize(size_t count)
     {
-        Memory.Resize(count + 1);
+        Data.Resize(count + 1);
     }
 };

@@ -34,12 +34,12 @@ struct BinaryTree
     };
 
     Arena Nodes;
-    Arena Memory;
+    Arena Data;
     Handle Root;
 
     BinaryTree()
         : Nodes()
-        , Memory()
+        , Data()
         , Root(UINT32_MAX)
     {
 
@@ -55,8 +55,8 @@ struct BinaryTree
         n->Child[0] = UINT32_MAX;
         n->Child[1] = UINT32_MAX;
 
-        Memory.Alloc(n->Val);
-        Type* v = (Type*)Memory[n->Val];
+        Data.Alloc(n->Val);
+        Type* v = (Type*)Data[n->Val];
         *v = val;
 
         return i;
@@ -65,13 +65,13 @@ struct BinaryTree
     void Init(size_t count)
     {
         Nodes.Init(sizeof(Node), count);
-        Memory.Init(sizeof(Type), count);
+        Data.Init(sizeof(Type), count);
     }
 
     void Shutdown()
     {
         Nodes.Shutdown();
-        Memory.Shutdown();
+        Data.Shutdown();
     }
 
     void Add(const Type& val)
@@ -81,7 +81,7 @@ struct BinaryTree
         while (i)
         {
             n = (Node*)Nodes[i];
-            Type* t = (Type*)Memory[n->Val];
+            Type* t = (Type*)Data[n->Val];
 
             if (val == *t)
                 return;
@@ -108,7 +108,7 @@ struct BinaryTree
         while (i)
         {
             n = (Node*)Nodes[i];
-            Type* t = (Type*)Memory[n->Val];
+            Type* t = (Type*)Data[n->Val];
 
             if (val == *t)
             {
@@ -118,8 +118,8 @@ struct BinaryTree
                     // n is a leaf node
                     if (!n->Child[0])
                     {
-                        Memory.Free(n->Val);
-                        Memory.Free(n);
+                        Data.Free(n->Val);
+                        Nodes.Free(n);
                         return;
                     }
 
@@ -139,8 +139,8 @@ struct BinaryTree
                     }
 
                     Node* p = (Node*)Nodes[c->Parent];
-                    Type* pval = (Type*)Memory[p->Val];
-                    Type* cval = (Type*)Memory[c->Val];
+                    Type* pval = (Type*)Data[p->Val];
+                    Type* cval = (Type*)Data[c->Val];
 
                     int a = *cval > *pval;
                     p->Child[a] = UINT32_MAX;
@@ -148,7 +148,7 @@ struct BinaryTree
 
                 Handle tmp = n->Val;
                 n->Val = c->Val;
-                Memory.Free(tmp);
+                Data.Free(tmp);
                 Nodes.Free(c);
                 return;
             }
@@ -164,7 +164,7 @@ struct BinaryTree
         while (i)
         {
             Node* n = (Node*)Nodes[i];
-            Type* t = (Type*)Memory[n->Val];
+            Type* t = (Type*)Data[n->Val];
 
             if (val == *t)
                 return t;
@@ -394,7 +394,7 @@ struct RBTree
     };
 
     // TODO: switch from pointers to handles, more cache friendly
-    // move Color and Val into MemoryArenas
+    // move Color and Val into Arenas
     struct Node
     {
         Node* Parent;
@@ -403,11 +403,11 @@ struct RBTree
         RBColor Color;
     };
 
-    MemoryArena Memory;
+    Arena Data;
     Node* Root;
 
     RBTree()
-        : Memory()
+        : Data()
         , Root(nullptr)
     {
 
@@ -415,7 +415,7 @@ struct RBTree
 
     void Init(size_t count)
     {
-        Memory.Init(sizeof(Node), count);
+        Data.Init(sizeof(Node), count);
     }
 
     Node* Find(const Type& val)

@@ -8,26 +8,32 @@ struct Vector
 {
     using Type = T;
 
-    Type* Memory;
+    Type* Data;
     size_t Size;
     size_t Index;
 
     Vector()
-        : Memory(nullptr)
+        : Data(nullptr)
         , Size(0)
         , Index(0)
     {}
 
     void Init(size_t count)
     {
-        Memory = (Type*)malloc(sizeof(Type) * count);
-        memset(Memory, 0, sizeof(Type) * count);
+        Data = (Type*)malloc(sizeof(Type) * count);
+        memset(Data, 0, sizeof(Type) * count);
         Size = count;
     }
 
     void Add(const Type& val)
     {
-        Memory[Index] = val;
+        Data[Index] = val;
         Index++;
+    }
+
+    void Resize(size_t sz)
+    {
+        Data = (Type*)realloc(Data, sz * sizeof(Type));
+        Size = sz;
     }
 };

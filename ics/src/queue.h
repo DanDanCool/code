@@ -7,13 +7,13 @@ struct Queue
 {
     using Type = T;
 
-    Type* Memory;
+    Type* Data;
     size_t Size;
     size_t Begin;
     size_t End;
 
     Queue()
-        : Memory(nullptr)
+        : Data(nullptr)
         , Size(0)
         , Begin(0)
         , End(0)
@@ -24,14 +24,14 @@ struct Queue
     void Init(size_t count)
     {
         Size = count;
-        Memory = (Type*)malloc(sizeof(Type) * count);
-        memset(Memory, 0, sizeof(Type) * count);
+        Data = (Type*)malloc(sizeof(Type) * count);
+        memset(Data, 0, sizeof(Type) * count);
     }
 
     void Shutdown()
     {
-        free(Memory);
-        Memory = nullptr;
+        free(Data);
+        Data = nullptr;
         Size = 0;
         Begin = 0;
         End = 0;
@@ -39,13 +39,13 @@ struct Queue
 
     void Push(const Type& val)
     {
-        Memory[End] = val;
+        Data[End] = val;
         End = (End + 1) % Size;
     }
 
     Type Pop()
     {
-        Type& val = Memory[Begin];
+        Type& val = Data[Begin];
         Begin = (Begin + 1) % Size;
         return val;
     }

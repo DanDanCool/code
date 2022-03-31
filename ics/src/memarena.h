@@ -31,7 +31,7 @@ struct Arena
     size_t BlockSz;
     size_t Count;
     size_t* FreeList;
-    uint8_t* Memory;
+    uint8_t* Data;
 
     Arena();
 
