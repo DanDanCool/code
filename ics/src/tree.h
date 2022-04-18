@@ -11,7 +11,6 @@ struct BinaryTree
 {
     using Type = T;
 
-    // TODO: switch to handle struct
     struct Node
     {
         Handle Parent;
