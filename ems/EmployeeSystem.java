@@ -1,6 +1,7 @@
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.io.File;
 
 public class EmployeeSystem
 {
@@ -13,12 +14,27 @@ public class EmployeeSystem
 
 	public void AddEmployee(EmployeeInfo e)
 	{
-		m_Table.Set(e);
+		m_Table.Add(e);
+	}
+
+	public void RemoveEmployee(EmployeeInfo e)
+	{
+		m_Table.Remove(e);
 	}
 
 	public EmployeeInfo GetEmployee(int id)
 	{
 		return m_Table.Get(id);
+	}
+
+	public EmployeeInfo[] GetEmployees()
+	{
+		return m_Table.GetEmployees();
+	}
+
+	public int GetSize()
+	{
+		return m_Table.Size();
 	}
 
 	private byte[] SerializeEmployee(EmployeeInfo e)
@@ -37,6 +53,37 @@ public class EmployeeSystem
 		}
 
 		return buf.getBytes();
+	}
+
+	private void DeserializeEmployee(String l)
+	{
+		String[] data = l.split(" ");
+		int id = Integer.parseInt(data[0]);
+		double deductrate = Double.parseDouble(data[3]);
+		int fulltime = Integer.parseInt(data[4]);
+
+		EmployeeInfo e;
+		if (fulltime == 1)
+		{
+			double salary = Double.parseDouble(data[5]);
+			FTE fte = new FTE(id, data[1], data[2]);
+			fte.SetSalary(salary);
+			e = fte;
+		}
+		else
+		{
+			double wage = Double.parseDouble(data[5]);
+			double hours = Double.parseDouble(data[6]);
+			double weeks = Double.parseDouble(data[7]);
+			PTE pte = new PTE(id, data[1], data[2]);
+			pte.SetHourlyWage(wage);
+			pte.SetHoursPerWeek(hours);
+			pte.SetWeeksPerYear(weeks);
+			e = pte;
+		}
+
+		e.SetDeductRate(deductrate);
+		AddEmployee(e);
 	}
 
 	public void Serialize(String fname)
@@ -72,11 +119,23 @@ public class EmployeeSystem
 	{
 		try
 		{
-			java.io.FileInputStream in = new java.io.FileInputStream(fname);
-			byte[] header = new byte[22];
-			in.read(header);
+			java.io.File f = new java.io.File(fname);
+			java.util.List<String> lines = java.nio.file.Files.readAllLines(f.toPath());
+			java.util.ListIterator<String> it = lines.listIterator();
 
-			in.close();
+			String l = it.next();
+			String header = "# employee file format: ID(int), First Name (String), Last Name (String), Deduct Rate (double), Full Time (boolean), Wages";
+			if (l.compareTo(header) != 0)
+			{
+				System.out.println(fname + " contains invalid employee data");
+				return;
+			}
+
+			for (int i = 1; i < lines.size(); i++)
+			{
+				l = it.next();
+				DeserializeEmployee(l);
+			}
 		}
 		catch (java.io.FileNotFoundException ex)
 		{
