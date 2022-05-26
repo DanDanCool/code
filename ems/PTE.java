@@ -19,14 +19,29 @@ public class PTE extends EmployeeInfo
 		return m_HourlyWage * m_HoursPerWeek * m_WeeksPerYear - m_DeductRate;
 	}
 
+	public double HourlyWage()
+	{
+		return m_HourlyWage;
+	}
+
 	public void SetHourlyWage(double wage)
 	{
 		m_HourlyWage = wage;
 	}
 
+	public double HoursPerWeek()
+	{
+		return m_HoursPerWeek;
+	}
+
 	public void SetHoursPerWeek(double hours)
 	{
 		m_HoursPerWeek = hours;
+	}
+
+	public double WeeksPerYear()
+	{
+		return m_WeeksPerYear;
 	}
 
 	public void SetWeeksPerYear(double weeks)

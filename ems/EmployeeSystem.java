@@ -12,9 +12,26 @@ public class EmployeeSystem
 		m_Table = new HashTable();
 	}
 
+	public void Clear()
+	{
+		m_Table.Clear();
+	}
+
 	public void AddEmployee(EmployeeInfo e)
 	{
 		m_Table.Add(e);
+	}
+
+	public int Hash(EmployeeInfo e)
+	{
+		return m_Table.Hash(e.GetID());
+	}
+
+	public EmployeeInfo AddEmptyEmployee()
+	{
+		FTE e = new FTE(m_Table.NextID(), "null", "null");
+		m_Table.Add(e);
+		return (EmployeeInfo)e;
 	}
 
 	public void RemoveEmployee(EmployeeInfo e)
@@ -94,14 +111,9 @@ public class EmployeeSystem
 			String header = "# employee file format: ID(int), First Name (String), Last Name (String), Deduct Rate (double), Full Time (boolean), Wages\n";
 			o.write(header.getBytes());
 
+			EmployeeInfo[] employees = m_Table.GetEmployees();
 			for (int i = 0; i < m_Table.Size(); i++)
-			{
-				EmployeeInfo e = m_Table.Get(i);
-				if (e == null)
-					continue;
-
-				o.write(SerializeEmployee(e));
-			}
+				o.write(SerializeEmployee(employees[i]));
 
 			o.close();
 		}
@@ -131,6 +143,7 @@ public class EmployeeSystem
 				return;
 			}
 
+			Clear();
 			for (int i = 1; i < lines.size(); i++)
 			{
 				l = it.next();

@@ -1,13 +1,15 @@
 import java.util.*;
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
 public class EMSFrame extends JFrame
 {
 	private EmployeeSystem m_System;
-	private EmployeeInfo m_Selected;
+	private EmployeeInfo m_Selected; // TODO: make this a stack
 
+	private EmployeePanel m_EmployeePanel;
 	private EmployeeInfoPanel m_EmployeeInfoPanel;
 
 	public EMSFrame()
@@ -21,7 +23,8 @@ public class EMSFrame extends JFrame
 
 		setLayout(new BorderLayout(5, 5));
 
-		add(new EmployeePanel(), BorderLayout.CENTER);
+		m_EmployeePanel = new EmployeePanel();
+		add(m_EmployeePanel, BorderLayout.CENTER);
 		add(new ActionPanel(), BorderLayout.EAST);
 
 		m_EmployeeInfoPanel = new EmployeeInfoPanel();
@@ -33,9 +36,11 @@ public class EMSFrame extends JFrame
 		setVisible(true);
 	}
 
+	// update UI
 	public void Refresh()
 	{
-		m_EmployeeInfoPanel.Refresh();
+		m_EmployeePanel.Update();
+		m_EmployeeInfoPanel.Update();
 	}
 
 	// contains buttons that do various things (editing, adding, etc...)
@@ -46,25 +51,74 @@ public class EMSFrame extends JFrame
 			setLayout(new GridLayout(4, 1));
 
 			JButton addbt = new JButton("Add");
+			addbt.addActionListener(new AddListener());
 			add(addbt);
 
 			JButton rmbt = new JButton("Remove");
+			rmbt.addActionListener(new RemoveListener());
 			add(rmbt);
 
 			JButton savebt = new JButton("Save");
+			savebt.addActionListener(new SaveListener());
 			add(savebt);
 
 			JButton loadbt = new JButton("Load");
+			loadbt.addActionListener(new LoadListener());
 			add(loadbt);
+		}
+
+		class AddListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				m_System.AddEmptyEmployee();
+				Refresh();
+			}
+		}
+
+		class RemoveListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected != null)
+					m_System.RemoveEmployee(m_Selected);
+
+				m_Selected = null;
+				Refresh();
+			}
+		}
+
+		class SaveListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				JFileChooser fc = new JFileChooser();
+				int sel = fc.showOpenDialog(m_EmployeeInfoPanel);
+				if (sel == JFileChooser.APPROVE_OPTION)
+					m_System.Serialize(fc.getSelectedFile().getName());
+			}
+		}
+
+		class LoadListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				JFileChooser fc = new JFileChooser();
+				int sel = fc.showOpenDialog(m_EmployeeInfoPanel);
+				if (sel == JFileChooser.APPROVE_OPTION)
+					m_System.Deserialize(fc.getSelectedFile().getName());
+			}
 		}
 	}
 
+	// Displays a table of employees
 	class EmployeePanel extends JPanel
 	{
 		private JTable m_Table;
 
 		public EmployeePanel()
 		{
+			setLayout(new BorderLayout(5, 5));
 			m_Table = new JTable(new EmployeeTableModel());
 			m_Table.setFillsViewportHeight(true);
 			m_Table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -72,7 +126,13 @@ public class EMSFrame extends JFrame
 			model.addListSelectionListener(new EmployeeSelectionListener());
 
 			JScrollPane pane = new JScrollPane(m_Table);
-			add(pane);
+			add(pane, BorderLayout.CENTER);
+		}
+
+		public void Update()
+		{
+			revalidate();
+			repaint();
 		}
 
 		class EmployeeTableModel extends javax.swing.table.AbstractTableModel
@@ -117,6 +177,7 @@ public class EMSFrame extends JFrame
 		}
 	}
 
+	// Sidebar that allows for editing of employee information
 	class EmployeeInfoPanel extends JPanel
 	{
 		JLabel m_ID;
@@ -135,24 +196,31 @@ public class EMSFrame extends JFrame
 
 			m_FirstName = new JTextField();
 			m_FirstName.setText("no employee selected");
+			m_FirstName.addActionListener(new FNameListener());
 			add(m_FirstName);
 
 			m_LastName = new JTextField();
 			m_LastName.setText("no employee selected");
+			m_LastName.addActionListener(new LNameListener());
 			add(m_LastName);
 
 			m_IsFTE = new JCheckBox("Fulltime", false);
+			m_IsFTE.addActionListener(new FTEListener());
 			add(m_IsFTE);
 
 			m_IsPTE = new JCheckBox("Parttime", false);
+			m_IsPTE.addActionListener(new PTEListener());
 			add(m_IsPTE);
 
 			m_Panel = new JPanel();
 			add(m_Panel);
 		}
 
-		public void Refresh()
+		public void Update()
 		{
+			if (m_Selected == null)
+				return;
+
 			m_ID.setText("ID: " + m_Selected.GetID());
 			m_FirstName.setText(m_Selected.GetFirstName());
 			m_LastName.setText(m_Selected.GetLastName());
@@ -167,8 +235,66 @@ public class EMSFrame extends JFrame
 			repaint();
 		}
 
+		class FNameListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected == null)
+					return;
+
+				m_Selected.SetFirstName(m_FirstName.getText());
+				Refresh();
+			}
+		}
+
+		class LNameListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected == null)
+					return;
+
+				m_Selected.SetLastName(m_LastName.getText());
+				Refresh();
+			}
+		}
+
+		class FTEListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected == null || !m_IsFTE.isSelected())
+					return;
+
+				FTE fte = new FTE(m_Selected.GetID(), m_Selected.GetFirstName(), m_Selected.GetLastName());
+				m_System.RemoveEmployee(m_Selected);
+				m_System.AddEmployee(fte);
+				m_Selected = fte;
+				m_IsPTE.setSelected(false);
+				Refresh();
+			}
+		}
+
+		class PTEListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected == null || !m_IsPTE.isSelected())
+					return;
+
+				PTE pte = new PTE(m_Selected.GetID(), m_Selected.GetFirstName(), m_Selected.GetLastName());
+				m_System.RemoveEmployee(m_Selected);
+				m_System.AddEmployee(pte);
+				m_Selected = pte;
+				m_IsFTE.setSelected(false);
+				Refresh();
+			}
+		}
+
 		class FTEPanel extends JPanel
 		{
+			JTextField m_Salary;
+
 			public FTEPanel()
 			{
 				setLayout(new GridLayout(1, 2, 5, 5));
@@ -176,14 +302,39 @@ public class EMSFrame extends JFrame
 				FTE fte = (FTE)m_Selected;
 
 				add(new JLabel("Salary"));
-				JTextField salary = new JTextField("Salary");
-				salary.setText("" + fte.GetSalary());
-				add(salary);
+				m_Salary = new JTextField("Salary");
+				m_Salary.setText("" + fte.GetSalary());
+				m_Salary.addActionListener(new SalaryListener());
+				add(m_Salary);
+			}
+
+			class SalaryListener implements ActionListener
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					if (m_Selected == null)
+						return;
+
+					try
+					{
+						FTE fte = (FTE)m_Selected;
+						double salary = Double.parseDouble(m_Salary.getText());
+						fte.SetSalary(salary);
+					}
+					catch (NumberFormatException ex)
+					{
+
+					}
+				}
 			}
 		}
 
 		class PTEPanel extends JPanel
 		{
+			private JTextField m_Wage;
+			private JTextField m_Hours;
+			private JTextField m_Weeks;
+
 			public PTEPanel()
 			{
 				setLayout(new GridLayout(3, 2, 5, 5));
@@ -191,19 +342,81 @@ public class EMSFrame extends JFrame
 				PTE pte = (PTE)m_Selected;
 
 				add(new JLabel("Wage"));
-				JTextField wage = new JTextField("Wage");
-				wage.setText("" + pte.HourlyWage());
-				add(wage);
+				m_Wage = new JTextField("Wage");
+				m_Wage.setText("" + pte.HourlyWage());
+				m_Wage.addActionListener(new WageListener());
+				add(m_Wage);
 
 				add(new JLabel("Hours"));
-				JTextField hours = new JTextField("Hours");
-				hours.setText("" + pte.HoursPerWeek());
-				add(hours);
+				m_Hours = new JTextField("Hours");
+				m_Hours.setText("" + pte.HoursPerWeek());
+				m_Hours.addActionListener(new HoursListener());
+				add(m_Hours);
 
 				add(new JLabel("Weeks"));
-				JTextField weeks = new JTextField("Weeks");
-				weeks.setText("" + pte.WeeksPerYear());
-				add(weeks);
+				m_Weeks = new JTextField("Weeks");
+				m_Weeks.setText("" + pte.WeeksPerYear());
+				m_Weeks.addActionListener(new WeeksListener());
+				add(m_Weeks);
+			}
+
+			class WageListener implements ActionListener
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					if (m_Selected == null)
+						return;
+
+					try
+					{
+						PTE pte = (PTE)m_Selected;
+						double wage = Double.parseDouble(m_Wage.getText());
+						pte.SetHourlyWage(wage);
+					}
+					catch (NumberFormatException ex)
+					{
+					}
+				}
+			}
+
+			class HoursListener implements ActionListener
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					if (m_Selected == null)
+						return;
+
+					try
+					{
+						PTE pte = (PTE)m_Selected;
+						double hours = Double.parseDouble(m_Hours.getText());
+						pte.SetHoursPerWeek(hours);
+					}
+					catch (NumberFormatException ex)
+					{
+
+					}
+				}
+			}
+
+			class WeeksListener implements ActionListener
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					if (m_Selected == null)
+						return;
+
+					try
+					{
+						PTE pte = (PTE)m_Selected;
+						double weeks = Double.parseDouble(m_Weeks.getText());
+						pte.SetWeeksPerYear(weeks);
+					}
+					catch (NumberFormatException ex)
+					{
+
+					}
+				}
 			}
 		}
 	}

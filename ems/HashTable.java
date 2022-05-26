@@ -3,6 +3,7 @@ public class HashTable
 	private int[] m_Sparse;
 	private EmployeeInfo[] m_Data;
 	private int m_Size;
+	private int m_NextID;
 	private final int MAX_EMPLOYEES = 1000000;
 
 	public HashTable()
@@ -14,9 +15,29 @@ public class HashTable
 			m_Sparse[i] = Integer.MAX_VALUE;
 	}
 
-	private int Hash(int id)
+	public void Clear()
+	{
+		m_Size = 0;
+		m_NextID = 0;
+
+		for (int i = 0; i <	MAX_EMPLOYEES; i++)
+		{
+			m_Sparse[i] = Integer.MAX_VALUE;
+			m_Data[i] = null;
+		}
+	}
+
+	public int Hash(int id)
 	{
 		return m_Sparse[id];
+	}
+
+	public int NextID()
+	{
+		while (m_Sparse[m_NextID] != Integer.MAX_VALUE)
+			m_NextID = (m_NextID + 1) % MAX_EMPLOYEES;
+
+		return m_NextID;
 	}
 
 	public EmployeeInfo Get(int id)
