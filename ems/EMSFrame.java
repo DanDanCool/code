@@ -96,6 +96,8 @@ public class EMSFrame extends JFrame
 				int sel = fc.showOpenDialog(m_EmployeeInfoPanel);
 				if (sel == JFileChooser.APPROVE_OPTION)
 					m_System.Serialize(fc.getSelectedFile().getName());
+
+				Refresh();
 			}
 		}
 
@@ -107,6 +109,8 @@ public class EMSFrame extends JFrame
 				int sel = fc.showOpenDialog(m_EmployeeInfoPanel);
 				if (sel == JFileChooser.APPROVE_OPTION)
 					m_System.Deserialize(fc.getSelectedFile().getName());
+
+				Refresh();
 			}
 		}
 	}
@@ -115,6 +119,7 @@ public class EMSFrame extends JFrame
 	class EmployeePanel extends JPanel
 	{
 		private JTable m_Table;
+		private JScrollPane m_Viewport;
 
 		public EmployeePanel()
 		{
@@ -125,12 +130,14 @@ public class EMSFrame extends JFrame
 			ListSelectionModel model = m_Table.getSelectionModel();
 			model.addListSelectionListener(new EmployeeSelectionListener());
 
-			JScrollPane pane = new JScrollPane(m_Table);
-			add(pane, BorderLayout.CENTER);
+			m_Viewport = new JScrollPane(m_Table);
+			add(m_Viewport, BorderLayout.CENTER);
 		}
 
 		public void Update()
 		{
+			m_Viewport.revalidate();
+			m_Viewport.repaint();
 			revalidate();
 			repaint();
 		}
