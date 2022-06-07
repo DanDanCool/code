@@ -16,7 +16,7 @@ public class PTE extends EmployeeInfo
 
 	public double NetAnnualIncome()
 	{
-		return m_HourlyWage * m_HoursPerWeek * m_WeeksPerYear - m_DeductRate;
+		return m_HourlyWage * m_HoursPerWeek * m_WeeksPerYear * (1 - m_DeductRate);
 	}
 
 	public double HourlyWage()

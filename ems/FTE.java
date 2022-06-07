@@ -14,7 +14,7 @@ public class FTE extends EmployeeInfo
 
 	public double NetAnnualIncome()
 	{
-		return m_Salary - m_DeductRate;
+		return m_Salary * (1 - m_DeductRate);
 	}
 
 	public void SetSalary(double s)

@@ -1,5 +1,5 @@
 # employee file format: ID(int), First Name (String), Last Name (String), Deduct Rate (double), Full Time (boolean), Wages
-1 test file 0.0 1 0.0
+1 test file 333.0 1 0.0
 3 a a 0.0 1 0.0
 234234 b b 0.0 0 0.0 0.0 0.0
 2 funny horse 0.0 0 0.0 0.0 0.0

@@ -188,18 +188,23 @@ public class EMSFrame extends JFrame
 	class EmployeeInfoPanel extends JPanel
 	{
 		JLabel m_ID;
+		JLabel m_Salary;
 		JTextField m_FirstName;
 		JTextField m_LastName;
+		JTextField m_DeductRate;
 		JCheckBox m_IsFTE;
 		JCheckBox m_IsPTE;
 		JPanel m_Panel;
 
 		public EmployeeInfoPanel()
 		{
-			setLayout(new GridLayout(6, 1));
+			setLayout(new GridLayout(8, 1));
 
 			m_ID = new JLabel("ID: null");
 			add(m_ID);
+
+			m_Salary = new JLabel("no employee selected");
+			add(m_Salary);
 
 			m_FirstName = new JTextField();
 			m_FirstName.setText("no employee selected");
@@ -210,6 +215,11 @@ public class EMSFrame extends JFrame
 			m_LastName.setText("no employee selected");
 			m_LastName.addActionListener(new LNameListener());
 			add(m_LastName);
+
+			m_DeductRate = new JTextField();
+			m_DeductRate.setText("0.0");
+			m_DeductRate.addActionListener(new DRListener());
+			add(m_DeductRate);
 
 			m_IsFTE = new JCheckBox("Fulltime", false);
 			m_IsFTE.addActionListener(new FTEListener());
@@ -229,8 +239,11 @@ public class EMSFrame extends JFrame
 				return;
 
 			m_ID.setText("ID: " + m_Selected.GetID());
+			m_Salary.setText("Salary: " + m_Selected.NetAnnualIncome());
+
 			m_FirstName.setText(m_Selected.GetFirstName());
 			m_LastName.setText(m_Selected.GetLastName());
+			m_DeductRate.setText("" + m_Selected.GetDeductRate());
 			m_IsFTE.setSelected(m_Selected.IsFTE());
 			m_IsPTE.setSelected(m_Selected.IsPTE());
 
@@ -263,6 +276,29 @@ public class EMSFrame extends JFrame
 
 				m_Selected.SetLastName(m_LastName.getText());
 				Refresh();
+			}
+		}
+
+		class DRListener implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (m_Selected == null)
+					return;
+
+				try
+				{
+					double dr = Double.parseDouble(m_DeductRate.getText());
+					dr = dr < 0.0 ? 0.0 : dr;
+					dr = dr > 1.0 ? 1.0 : dr;
+					m_Selected.SetDeductRate(dr);
+					m_DeductRate.setText("" + dr);
+					Refresh();
+				}
+				catch (NumberFormatException ex)
+				{
+
+				}
 			}
 		}
 
@@ -327,6 +363,7 @@ public class EMSFrame extends JFrame
 						FTE fte = (FTE)m_Selected;
 						double salary = Double.parseDouble(m_Salary.getText());
 						fte.SetSalary(salary);
+						Refresh();
 					}
 					catch (NumberFormatException ex)
 					{
@@ -379,6 +416,7 @@ public class EMSFrame extends JFrame
 						PTE pte = (PTE)m_Selected;
 						double wage = Double.parseDouble(m_Wage.getText());
 						pte.SetHourlyWage(wage);
+						Refresh();
 					}
 					catch (NumberFormatException ex)
 					{
@@ -398,6 +436,7 @@ public class EMSFrame extends JFrame
 						PTE pte = (PTE)m_Selected;
 						double hours = Double.parseDouble(m_Hours.getText());
 						pte.SetHoursPerWeek(hours);
+						Refresh();
 					}
 					catch (NumberFormatException ex)
 					{
@@ -418,6 +457,7 @@ public class EMSFrame extends JFrame
 						PTE pte = (PTE)m_Selected;
 						double weeks = Double.parseDouble(m_Weeks.getText());
 						pte.SetWeeksPerYear(weeks);
+						Refresh();
 					}
 					catch (NumberFormatException ex)
 					{
