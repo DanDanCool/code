@@ -165,6 +165,7 @@ public class Test
 		system.Status();
 	}
 
+	// run tests
 	public static void main(String[] args)
 	{
 		System.out.println("------------------------------------------");

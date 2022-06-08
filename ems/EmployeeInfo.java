@@ -21,6 +21,7 @@ public class EmployeeInfo
 		m_LastName = ldata[0];
 	}
 
+	// should probably rename these to be less verbose, too annoying at this stage though
 	public double NetAnnualIncome()
 	{
 		return 0;

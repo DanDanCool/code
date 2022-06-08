@@ -4,6 +4,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+// gui frontend stuff
 public class EMSFrame extends JFrame
 {
 	private EmployeeSystem m_System;

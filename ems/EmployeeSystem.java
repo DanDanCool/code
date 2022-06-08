@@ -3,6 +3,8 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.io.File;
 
+// provides an interface for accessing and editing employee data, as well as providing serializing and deserializing
+// services
 public class EmployeeSystem
 {
 	private HashTable m_Table;
