@@ -29,7 +29,11 @@ public class EmployeeSystem
 
 	public EmployeeInfo AddEmptyEmployee()
 	{
-		FTE e = new FTE(m_Table.NextID(), "null", "null");
+		int id = m_Table.NextID();
+		if (id == -1)
+			return null;
+
+		FTE e = new FTE(id, "null", "null");
 		m_Table.Add(e);
 		return (EmployeeInfo)e;
 	}
@@ -162,11 +166,11 @@ public class EmployeeSystem
 
 	public void Status()
 	{
+		EmployeeInfo[] employees = GetEmployees();
 		for (int i = 0; i < m_Table.Size(); i++)
 		{
-			EmployeeInfo e = m_Table.Get(i);
-			if (e != null)
-				System.out.println(i + " " + e.GetFirstName());
+			EmployeeInfo e = employees[i];
+			System.out.println("id: " + e.GetID() + "  " + e.GetFirstName() + " " + e.GetLastName() + " " + " net income: " + e.NetAnnualIncome());
 		}
 	}
 }

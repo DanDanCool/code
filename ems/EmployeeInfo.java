@@ -13,8 +13,12 @@ public class EmployeeInfo
 	protected EmployeeInfo(int id, String fname, String lname)
 	{
 		m_ID = id;
-		m_FirstName = fname;
-		m_LastName = lname;
+
+		String[] fdata = fname.split(" ");
+		m_FirstName = fdata[0];
+
+		String[] ldata = lname.split(" ");
+		m_LastName = ldata[0];
 	}
 
 	public double NetAnnualIncome()
@@ -49,7 +53,8 @@ public class EmployeeInfo
 
 	public void SetFirstName(String name)
 	{
-		m_FirstName = name;
+		String[] fdata = name.split(" ");
+		m_FirstName = fdata[0];
 	}
 
 	public String GetFirstName()
@@ -59,7 +64,8 @@ public class EmployeeInfo
 
 	public void SetLastName(String name)
 	{
-		m_LastName = name;
+		String[] ldata = name.split(" ");
+		m_LastName = ldata[0];
 	}
 
 	public String GetLastName()
@@ -77,6 +83,7 @@ public class EmployeeInfo
 		return m_ID;
 	}
 
+	// should probably be merged into one function that returns some employee type enum
 	public boolean IsFTE()
 	{
 		return false;

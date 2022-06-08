@@ -198,7 +198,7 @@ public class EMSFrame extends JFrame
 
 		public EmployeeInfoPanel()
 		{
-			setLayout(new GridLayout(8, 1));
+			setLayout(new GridLayout(7, 1));
 
 			m_ID = new JLabel("ID: null");
 			add(m_ID);
@@ -209,25 +209,43 @@ public class EMSFrame extends JFrame
 			m_FirstName = new JTextField();
 			m_FirstName.setText("no employee selected");
 			m_FirstName.addActionListener(new FNameListener());
-			add(m_FirstName);
+
+			JPanel fname = new JPanel();
+			fname.setLayout(new GridLayout(1, 2));
+			fname.add(new JLabel("First Name:"));
+			fname.add(m_FirstName);
+			add(fname);
 
 			m_LastName = new JTextField();
 			m_LastName.setText("no employee selected");
 			m_LastName.addActionListener(new LNameListener());
-			add(m_LastName);
+
+			JPanel lname = new JPanel();
+			lname.setLayout(new GridLayout(1, 2));
+			lname.add(new JLabel("Last Name:"));
+			lname.add(m_LastName);
+			add(lname);
 
 			m_DeductRate = new JTextField();
 			m_DeductRate.setText("0.0");
 			m_DeductRate.addActionListener(new DRListener());
-			add(m_DeductRate);
+
+			JPanel dr = new JPanel();
+			dr.setLayout(new GridLayout(1, 2));
+			dr.add(new JLabel("Deduct Rate:"));
+			dr.add(m_DeductRate);
+			add(dr);
 
 			m_IsFTE = new JCheckBox("Fulltime", false);
 			m_IsFTE.addActionListener(new FTEListener());
-			add(m_IsFTE);
-
 			m_IsPTE = new JCheckBox("Parttime", false);
 			m_IsPTE.addActionListener(new PTEListener());
-			add(m_IsPTE);
+
+			JPanel status = new JPanel();
+			status.setLayout(new GridLayout(1, 2));
+			status.add(m_IsFTE);
+			status.add(m_IsPTE);
+			add(status);
 
 			m_Panel = new JPanel();
 			add(m_Panel);

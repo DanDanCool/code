@@ -1,5 +1,6 @@
 public class PTE extends EmployeeInfo
 {
+	// considering shortening these names, but kind of annoying to do so at this point
 	private double m_HourlyWage;
 	private double m_HoursPerWeek;
 	private double m_WeeksPerYear;
