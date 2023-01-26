@@ -13,7 +13,7 @@ public class Main
 
 		Storage storage = new Storage();
 
-		DirReader reader = new DirReader(".");
+		DirReader reader = new DirReader("~/Documents/dev/");
 		reader.Parse();
 		reader.Get(storage);
 		//printdir(storage);
